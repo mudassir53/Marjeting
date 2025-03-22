@@ -18,11 +18,6 @@ app.use("/uploads", express.static(path.join(__dirname, "uploads")));  // Fixed 
 app.use(express.json()); // Parse JSON requests
 app.use(cors()); // Enable CORS
 
-app.get("/", (req, res) => { 
-  app.use(express.static(path.resolve(__dirname, "frontend", "build"))); // Fixed __dirname here
-  res.sendFile(path.resolve(__dirname, "frontend", "build", "index.html")); // Fixed __dirname here
-});
-
 // Connect to MongoDB
 mongoose
   .connect("mongodb+srv://bhattimudassir897:MprVOulvDwMK0ljH@cluster0.3cjie.mongodb.net/?retryWrites=true&w=majority&appName=Cluster0", {
