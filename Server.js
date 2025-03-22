@@ -1,7 +1,7 @@
 const express = require("express");
 const mongoose = require("mongoose");
 const cors = require("cors");
-const path=require('path');
+const path = require('path');
 // Import Routes
 const heroRoutes = require("./routes/HeroRoute");
 const aboutRoutes = require("./routes/AboutRoute");
@@ -10,11 +10,18 @@ const newsletterRoutes = require("./routes/NewsletterRoute");
 
 // Initialize Express App
 const app = express();
+
 // Serve images from the 'uploads' folder
-app.use("/uploads", express.static(path.join(__dirname, "uploads")));
+app.use("/uploads", express.static(path.join(__dirname, "uploads")));  // Fixed __dirname here
+
 // Middleware
 app.use(express.json()); // Parse JSON requests
 app.use(cors()); // Enable CORS
+
+app.get("/", (req, res) => { 
+  app.use(express.static(path.resolve(__dirname, "frontend", "build"))); // Fixed __dirname here
+  res.sendFile(path.resolve(__dirname, "frontend", "build", "index.html")); // Fixed __dirname here
+});
 
 // Connect to MongoDB
 mongoose

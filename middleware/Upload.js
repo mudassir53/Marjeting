@@ -1,22 +1,24 @@
 const multer = require("multer");
-const path = require("path");
+const { CloudinaryStorage } = require("multer-storage-cloudinary");
+const cloudinary = require("../middleware/Cloudinary");
 
-// Define storage
-const storage = multer.diskStorage({
-  destination: function (req, file, cb) {
-    cb(null, "uploads/"); // Upload directory
-  },
-  filename: function (req, file, cb) {
-    cb(null, Date.now() + path.extname(file.originalname));
+const storage = new CloudinaryStorage({
+  cloudinary: cloudinary,
+  params: async (req, file) => {
+    return {
+      folder: "uploads", // Cloudinary folder name
+      format: file.mimetype.split("/")[1], // Use mimetype to determine format
+      public_id: Date.now() + "-" + file.originalname.split(".")[0],
+    };
   },
 });
 
-// File filter (only images allowed)
 const fileFilter = (req, file, cb) => {
-  if (file.mimetype.startsWith("image/")) {
+  const allowedMimeTypes = ["image/png", "image/jpeg", "image/jpg", "image/gif", "image/webp"];
+  if (allowedMimeTypes.includes(file.mimetype)) {
     cb(null, true);
   } else {
-    cb(new Error("Only images are allowed"), false);
+    cb(new Error("Only image files are allowed"), false);
   }
 };
 

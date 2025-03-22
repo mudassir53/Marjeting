@@ -1,18 +1,24 @@
 const Hero = require("../model/Hero");
+const cloudinary = require("../middleware/Cloudinary");
 
 // Create Hero
 exports.createHero = async (req, res) => {
   try {
     const { title, description } = req.body;
-  
-    const image1 = req.files["image1"] 
-    ? `${req.protocol}://${req.get('host')}/uploads/${req.files["image1"][0].filename}` 
-    : "";
-  
-  const image2 = req.files["image2"] 
-    ? `${req.protocol}://${req.get('host')}/uploads/${req.files["image2"][0].filename}` 
-    : "";
-  
+
+    // Upload image1 to Cloudinary
+    let image1 = "";
+    if (req.files["image1"]) {
+      const result1 = await cloudinary.uploader.upload(req.files["image1"][0].path);
+      image1 = result1.secure_url; // Cloudinary URL for image1
+    }
+
+    // Upload image2 to Cloudinary
+    let image2 = "";
+    if (req.files["image2"]) {
+      const result2 = await cloudinary.uploader.upload(req.files["image2"][0].path);
+      image2 = result2.secure_url; // Cloudinary URL for image2
+    }
 
     const newHero = new Hero({ title, description, image1, image2 });
     await newHero.save();
@@ -52,14 +58,21 @@ exports.updateHero = async (req, res) => {
     const existingHero = await Hero.findById(req.params.id);
     if (!existingHero) return res.status(404).json({ message: "Hero not found" });
 
-    // Use the existing image if no new image is uploaded
-    const image1 = req.files["image1"]
-      ? `${req.protocol}://${req.get('host')}/uploads/${req.files["image1"][0].filename}`
-      : existingHero.image1; // Keep the existing image1 if no new image is uploaded
+    // Upload image1 to Cloudinary if a new image is provided, otherwise keep the existing image1
+    let image1 = existingHero.image1; // Default to the existing image1
+    if (req.files["image1"]) {
+      // Upload new image1 to Cloudinary
+      const result1 = await cloudinary.uploader.upload(req.files["image1"][0].path);
+      image1 = result1.secure_url; // Update with Cloudinary URL
+    }
 
-    const image2 = req.files["image2"]
-      ? `${req.protocol}://${req.get('host')}/uploads/${req.files["image2"][0].filename}`
-      : existingHero.image2; // Keep the existing image2 if no new image is uploaded
+    // Upload image2 to Cloudinary if a new image is provided, otherwise keep the existing image2
+    let image2 = existingHero.image2; // Default to the existing image2
+    if (req.files["image2"]) {
+      // Upload new image2 to Cloudinary
+      const result2 = await cloudinary.uploader.upload(req.files["image2"][0].path);
+      image2 = result2.secure_url; // Update with Cloudinary URL
+    }
 
     // Update the hero with the new data
     const updatedHero = await Hero.findByIdAndUpdate(
